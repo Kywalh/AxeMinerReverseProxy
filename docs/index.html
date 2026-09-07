@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#f7931a">
+  <meta name="description" content="Generate a secure NGINX reverse proxy configuration for AxeOS miners directly in your browser.">
+  <title>AxeOS Reverse Proxy Config Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="background-glow background-glow-one"></div>
+  <div class="background-glow background-glow-two"></div>
+
+  <header class="site-header">
+    <a class="brand" href="https://github.com/Kywalh/AxeMinerReverseProxy" target="_blank" rel="noreferrer">
+      <span class="brand-mark">₿</span>
+      <span>
+        <strong>AxeOS Reverse Proxy</strong>
+        <small>NGINX config generator</small>
+      </span>
+    </a>
+    <a class="github-link" href="https://github.com/Kywalh/AxeMinerReverseProxy" target="_blank" rel="noreferrer">View on GitHub ↗</a>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero">
+      <div class="eyebrow">SECURE REMOTE ACCESS FOR AXEOS MINERS</div>
+      <h1>Generate your reverse proxy config.<br><span>No NGINX gymnastics required.</span></h1>
+      <p>
+        Build a read-only HTTPS reverse proxy for one or more AxeOS miners. The generator runs entirely in your browser:
+        your domain, local IPs and ports are never sent anywhere.
+      </p>
+      <div class="hero-badges">
+        <span>🔒 HTTPS</span>
+        <span>👁 Read-only by default</span>
+        <span>⚡ Multi-miner</span>
+        <span>🧠 Browser-only</span>
+      </div>
+    </section>
+
+    <section class="layout-grid">
+      <div class="panel form-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">STEP 1</p>
+            <h2>Your setup</h2>
+          </div>
+          <button id="resetButton" class="button button-ghost" type="button">Reset</button>
+        </div>
+
+        <div class="field-group">
+          <label for="domain">Public domain name</label>
+          <input id="domain" type="text" spellcheck="false" autocomplete="off" placeholder="miners.example.com" value="miners.example.com">
+          <small>Do not include <code>https://</code> or a port.</small>
+        </div>
+
+        <div class="toggle-card">
+          <div>
+            <strong>Allow remote miner restart</strong>
+            <p>Allows only <code>POST /api/system/restart</code>. All other write requests remain blocked.</p>
+          </div>
+          <label class="switch" aria-label="Allow remote restart">
+            <input id="allowRestart" type="checkbox" checked>
+            <span class="switch-track"></span>
+          </label>
+        </div>
+
+        <div class="miners-heading">
+          <div>
+            <p class="section-kicker">MINERS</p>
+            <h3>Local AxeOS devices</h3>
+          </div>
+          <button id="addMinerButton" class="button button-secondary" type="button">+ Add miner</button>
+        </div>
+
+        <div id="minersList" class="miners-list"></div>
+
+        <div id="validationMessage" class="validation-message" role="alert" aria-live="polite"></div>
+
+        <button id="generateButton" class="button button-primary button-large" type="button">
+          Generate NGINX configuration
+        </button>
+      </div>
+
+      <div class="panel output-panel">
+        <div class="panel-heading output-heading">
+          <div>
+            <p class="section-kicker">STEP 2</p>
+            <h2>Generated configuration</h2>
+          </div>
+          <span id="statusPill" class="status-pill">Ready</span>
+        </div>
+
+        <div class="output-actions">
+          <button id="copyConfigButton" class="button button-secondary" type="button" disabled>Copy config</button>
+          <button id="downloadConfigButton" class="button button-secondary" type="button" disabled>Download axeos-miners</button>
+        </div>
+
+        <pre class="code-box"><code id="configOutput">Fill in your setup and click “Generate NGINX configuration”.</code></pre>
+
+        <div class="commands-block">
+          <div class="commands-heading">
+            <div>
+              <p class="section-kicker">STEP 3</p>
+              <h3>Install it on your proxy</h3>
+            </div>
+            <button id="copyCommandsButton" class="button button-ghost" type="button" disabled>Copy commands</button>
+          </div>
+          <pre class="code-box code-box-small"><code id="commandsOutput">Installation commands will appear here.</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-grid">
+      <article class="info-card">
+        <span class="info-icon">🛡️</span>
+        <h3>What is blocked?</h3>
+        <p>Configuration changes, pool/wallet edits, overclocking, firmware uploads and other write operations are denied from the WAN side.</p>
+      </article>
+      <article class="info-card">
+        <span class="info-icon">🔁</span>
+        <h3>What remains available?</h3>
+        <p>GET/HEAD access to the AxeOS WebUI and REST API. You can optionally keep the dedicated restart endpoint available.</p>
+      </article>
+      <article class="info-card">
+        <span class="info-icon">⚠️</span>
+        <h3>Important</h3>
+        <p>This reduces exposure but does not make Internet-facing mining hardware risk-free. Keep AxeOS, NGINX and your host system updated.</p>
+      </article>
+    </section>
+
+    <section class="help-panel">
+      <div>
+        <p class="section-kicker">CERTIFICATES</p>
+        <h2>Before enabling the generated config</h2>
+        <p>
+          Your TLS certificate must exist under <code>/etc/letsencrypt/live/YOUR-DOMAIN/</code>.
+          Certificate issuance depends on your DNS/router setup, so the generator does not attempt to automate that potentially destructive step.
+          See the repository README for the Certbot setup.
+        </p>
+      </div>
+      <a class="button button-secondary" href="https://github.com/Kywalh/AxeMinerReverseProxy#generate-ssl-certificate" target="_blank" rel="noreferrer">Open certificate guide ↗</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>AxeOS Reverse Proxy Config Generator · Open source · No data collection</p>
+    <p>Originally tested with Bitaxe Gamma miners running AxeOS.</p>
+  </footer>
+
+  <template id="minerTemplate">
+    <article class="miner-card">
+      <div class="miner-card-heading">
+        <strong class="miner-title">Miner</strong>
+        <button class="remove-miner" type="button" title="Remove miner" aria-label="Remove miner">×</button>
+      </div>
+      <div class="miner-fields">
+        <div class="field-group">
+          <label>Miner name</label>
+          <input class="miner-name" type="text" maxlength="40" placeholder="Office miner">
+        </div>
+        <div class="field-group">
+          <label>Local IPv4 address</label>
+          <input class="miner-ip" type="text" inputmode="decimal" spellcheck="false" placeholder="192.168.1.201">
+        </div>
+        <div class="field-group">
+          <label>Public HTTPS port</label>
+          <input class="miner-port" type="number" min="1" max="65535" inputmode="numeric" placeholder="18443">
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
